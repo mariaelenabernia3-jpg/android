@@ -1,29 +1,38 @@
-// Actualizar el reloj cada minuto
+// Actualizar Hora Real
 function updateClock() {
     const now = new Date();
-    const time = now.getHours().toString().padStart(2, '0') + ":" + 
-                 now.getMinutes().toString().padStart(2, '0');
-    document.getElementById('clock').textContent = time;
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    document.getElementById('clock').textContent = `${hours}:${minutes}`;
 }
+
+// Ejecutar reloj cada segundo
 setInterval(updateClock, 1000);
 updateClock();
 
 // Manejar apertura de aplicaciones
-function runApp(name) {
-    console.log(`Iniciando app: ${name}`);
+function openApp(name) {
+    // Vibración corta si el dispositivo lo permite
+    if (navigator.vibrate) {
+        navigator.vibrate(40);
+    }
     
-    // Ejemplo de interactividad hacker
-    if(name === 'Terminal') {
-        const terminal = confirm("¿Deseas conectar al servidor remoto?");
-        if(terminal) alert("Conexión establecida. IP: 192.168.1.105");
-    } else {
-        alert("La aplicación " + name + " requiere permisos de ROOT.");
+    console.log("Abriendo app: " + name);
+    
+    // Aquí puedes disparar eventos del juego
+    if (name === 'SQL Inject') {
+        alert("¡Peligro! Intentando inyectar base de datos...");
     }
 }
 
-// Botón de encendido (solo estético para PC)
-document.getElementById('powerBtn').addEventListener('click', () => {
-    const screen = document.getElementById('screen');
-    screen.style.transition = "opacity 0.3s";
-    screen.style.opacity = screen.style.opacity === "0" ? "1" : "0";
+// Botón de encendido (Filtro de pantalla)
+const powerBtn = document.getElementById('powerBtn');
+const screen = document.getElementById('screen');
+let screenOn = true;
+
+powerBtn.addEventListener('click', () => {
+    screenOn = !screenOn;
+    screen.style.transition = "filter 0.3s ease, opacity 0.3s ease";
+    screen.style.opacity = screenOn ? "1" : "0";
+    screen.style.filter = screenOn ? "brightness(1)" : "brightness(0)";
 });
