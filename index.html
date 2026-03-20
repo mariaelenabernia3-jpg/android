@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Hacker OS</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- El contenedor 'smartphone' es el que cambia según el dispositivo -->
+    <div class="smartphone">
+        
+        <!-- Estos elementos solo se verán en PC -->
+        <div class="physical-buttons">
+            <div class="side-button volume-up"></div>
+            <div class="side-button volume-down"></div>
+            <div class="side-button power" id="powerBtn"></div>
+        </div>
+
+        <div class="screen" id="screen">
+            <!-- Fondo de pantalla personalizado -->
+            <div class="wallpaper"></div>
+
+            <!-- Barra de estado -->
+            <div class="status-bar">
+                <span id="clock">00:00</span>
+                <div class="status-icons">
+                    <span>📡</span>
+                    <span style="color: #0f0;">VPN</span>
+                    <span>🔋 99%</span>
+                </div>
+            </div>
+
+            <!-- El Notch (Solo visible en PC) -->
+            <div class="notch"><div class="camera"></div></div>
+
+            <!-- Escritorio con APKs -->
+            <main class="desktop">
+                <div class="apk-grid">
+                    <div class="apk" onclick="runApp('Terminal')">
+                        <div class="icon">📟</div>
+                        <span>Terminal</span>
+                    </div>
+                    <div class="apk" onclick="runApp('Database')">
+                        <div class="icon" style="background: rgba(255,0,0,0.2); border-color: red;">☣️</div>
+                        <span>SQL Inject</span>
+                    </div>
+                    <div class="apk" onclick="runApp('Browser')">
+                        <div class="icon">🌐</div>
+                        <span>DarkWeb</span>
+                    </div>
+                    <div class="apk" onclick="runApp('Messages')">
+                        <div class="icon">💬</div>
+                        <span>Signal</span>
+                    </div>
+                    <div class="apk" onclick="runApp('Wallet')">
+                        <div class="icon">₿</div>
+                        <span>Crypto</span>
+                    </div>
+                    <div class="apk" onclick="runApp('Settings')">
+                        <div class="icon">⚙️</div>
+                        <span>Config</span>
+                    </div>
+                </div>
+            </main>
+
+            <!-- Dock inferior -->
+            <div class="dock">
+                <div class="dock-icon">📞</div>
+                <div class="dock-icon">📟</div>
+                <div class="dock-icon">📂</div>
+            </div>
+
+            <div class="home-bar"></div>
+        </div>
+    </div>
+
+    <script src="os.js"></script>
+</body>
+</html>

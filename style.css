@@ -1,0 +1,171 @@
+:root {
+    --hacker-green: #00ff41;
+    --phone-bg: #111;
+    /* Ajustamos el tamaño basándonos en la altura de la pantalla del PC */
+    --phone-height: 92vh; 
+    --phone-aspect-ratio: 9 / 19; 
+}
+
+* {
+    box-sizing: border-box; /* Fundamental para que el padding no estire el teléfono */
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: #000;
+    height: 100vh;
+    width: 100vw;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden; /* Evita que aparezcan barras de scroll */
+    font-family: 'Segoe UI', sans-serif;
+}
+
+/* EL SMARTPHONE AHORA ES DINÁMICO */
+.smartphone {
+    position: relative;
+    height: var(--phone-height); /* Usa el 92% de la altura de la pantalla */
+    aspect-ratio: var(--phone-aspect-ratio); /* Mantiene la forma de teléfono automáticamente */
+    background: var(--phone-bg);
+    border-radius: 4vw; /* Bordes redondeados proporcionales */
+    padding: 10px;
+    border: 3px solid #252525;
+    box-shadow: 0 0 40px rgba(0, 255, 65, 0.15);
+    display: flex;
+    flex-direction: column;
+}
+
+.screen {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    background: #000;
+    border-radius: calc(4vw - 10px);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    z-index: 1;
+}
+
+/* FONDO DE PANTALLA */
+.wallpaper {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background-image: url('pantalla.png');
+    background-size: cover;
+    background-position: center;
+    z-index: 0;
+}
+
+/* Filtro oscuro para que las apps resalten como en tu captura */
+.screen::before {
+    content: '';
+    position: absolute;
+    top:0; left:0; width:100%; height:100%;
+    background: rgba(0,0,0,0.3);
+    z-index: 1;
+}
+
+/* CONTENIDO (APPS) */
+.desktop {
+    position: relative;
+    z-index: 2;
+    flex: 1;
+    padding: 20px;
+}
+
+.apk-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    margin-top: 50px; /* Espacio para el notch */
+}
+
+.apk {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    color: white;
+    cursor: pointer;
+}
+
+.icon {
+    width: 55px;
+    height: 55px;
+    background: rgba(255,255,255,0.1);
+    backdrop-filter: blur(8px);
+    border-radius: 12px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 28px;
+    margin-bottom: 5px;
+    border: 1px solid rgba(255,255,255,0.2);
+}
+
+.apk span {
+    font-size: 10px;
+    text-shadow: 1px 1px 2px #000;
+}
+
+/* INTERFAZ SUPERIOR E INFERIOR */
+.status-bar {
+    position: relative;
+    z-index: 10;
+    height: 35px;
+    padding: 10px 20px 0;
+    display: flex;
+    justify-content: space-between;
+    color: white;
+    font-size: 12px;
+}
+
+.notch {
+    position: absolute;
+    top: 0; left: 50%;
+    transform: translateX(-50%);
+    width: 120px; height: 25px;
+    background: #000;
+    border-bottom-left-radius: 15px;
+    border-bottom-right-radius: 15px;
+    z-index: 20;
+}
+
+.dock {
+    position: relative;
+    z-index: 10;
+    margin: 10px;
+    height: 65px;
+    background: rgba(255,255,255,0.1);
+    backdrop-filter: blur(15px);
+    border-radius: 20px;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+
+.home-bar {
+    width: 80px;
+    height: 4px;
+    background: white;
+    margin: 0 auto 8px;
+    border-radius: 10px;
+    z-index: 10;
+}
+
+/* RESPONSIVE: SI ES MÓVIL, OCUPAR TODO */
+@media (max-width: 500px) {
+    .smartphone {
+        width: 100vw;
+        height: 100vh;
+        border-radius: 0;
+        padding: 0;
+        border: none;
+    }
+    .screen { border-radius: 0; }
+    .notch, .physical-buttons { display: none; }
+}
