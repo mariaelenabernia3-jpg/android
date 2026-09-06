@@ -1,78 +1,77 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <style>
-        body { background: #1a1a2e; color: white; font-family: 'Arial', sans-serif; text-align: center; margin: 0; overflow: hidden; }
-        #game-ui { padding: 20px; }
-        canvas { background: #0f3460; border: 4px solid #e94560; border-radius: 10px; cursor: crosshair; box-shadow: 0 0 20px #e94560; }
-        button { background: #e94560; color: white; border: none; padding: 15px 30px; border-radius: 25px; font-size: 18px; cursor: pointer; transition: 0.3s; }
-        button:hover { background: #ff2e63; transform: scale(1.1); }
-        .hidden { display: none; }
+        body { margin: 0; background: #050505; color: #00ffcc; font-family: 'Courier New', monospace; text-align: center; overflow: hidden; touch-action: none; }
+        #ui { position: absolute; top: 10px; width: 100%; pointer-events: none; }
+        canvas { display: block; width: 100vw; height: 80vh; background: #111; border-bottom: 5px solid #ff00ff; }
+        #controls { padding: 20px; }
+        button { background: transparent; border: 2px solid #00ffcc; color: #00ffcc; padding: 15px 30px; font-size: 20px; border-radius: 10px; }
     </style>
 </head>
 <body>
 
-<div id="game-ui">
-    <h1>Neon Duel</h1>
-    <div id="menu">
-        <button onclick="startHost()">Crear Partida</button>
-        <button onclick="findGames()">Buscar Partidas</button>
-    </div>
-    <div id="status"></div>
-    <canvas id="canvas" width="300" height="300" class="hidden"></canvas>
+<div id="ui">
+    <h2 id="status">NEON ARENA</h2>
+    <div id="score">Tú: 0 | Rival: 0</div>
+</div>
+
+<canvas id="canvas"></canvas>
+
+<div id="controls">
+    <button onclick="host()">CREAR ARENA</button>
+    <button onclick="join()">UNIRSE</button>
 </div>
 
 <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
 <script>
-    const peer = new Peer(); // PeerJS gestiona la conexión
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
-    let conn;
-    let playerX = 150, playerY = 150;
-    let enemyX = 0, enemyY = 0;
+    const peer = new Peer();
+    let conn, score = [0, 0];
+    let me = {x: 100, y: 100, r: 20}, rival = {x: 200, y: 200, r: 20}, ball = {x: 150, y: 150, r: 10};
 
-    // --- LÓGICA DE JUEGO ---
+    // Ajuste de pantalla
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight * 0.8;
+
     function draw() {
-        ctx.clearRect(0, 0, 300, 300);
-        // Jugador
-        ctx.fillStyle = '#e94560';
-        ctx.fillRect(playerX-25, playerY-25, 50, 50);
-        // Enemigo
-        ctx.fillStyle = '#4ecca3';
-        ctx.fillRect(enemyX-25, enemyY-25, 50, 50);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        // Dibujar elementos (Neón)
+        ctx.fillStyle = '#00ffcc';
+        ctx.beginPath(); ctx.arc(me.x, me.y, me.r, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = '#ff00ff';
+        ctx.beginPath(); ctx.arc(rival.x, rival.y, rival.r, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = '#ffff00';
+        ctx.beginPath(); ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI*2); ctx.fill();
+        requestAnimationFrame(draw);
     }
 
     canvas.addEventListener('touchmove', (e) => {
-        playerX = e.touches[0].clientX - canvas.offsetLeft;
-        playerY = e.touches[0].clientY - canvas.offsetTop;
-        if(conn) conn.send({x: playerX, y: playerY});
-        draw();
+        me.x = e.touches[0].clientX;
+        me.y = e.touches[0].clientY;
+        if(conn) conn.send({type: 'move', x: me.x, y: me.y});
     });
 
-    // --- CONEXIÓN SIMPLE ---
-    function startHost() {
-        document.getElementById('menu').classList.add('hidden');
-        document.getElementById('status').innerText = "Esperando jugador... Comparte tu ID: " + peer.id;
-        peer.on('connection', c => {
-            conn = c;
-            startGame();
-        });
+    function host() {
+        document.getElementById('status').innerText = "ID: " + peer.id;
+        peer.on('connection', c => { conn = c; setup(); });
     }
 
-    function findGames() {
-        const id = prompt("Introduce el ID de tu amigo:");
+    function join() {
+        let id = prompt("ID del rival:");
         conn = peer.connect(id);
-        startGame();
+        setup();
     }
 
-    function startGame() {
-        document.getElementById('status').innerText = "¡Conectado! Muévete.";
-        document.getElementById('canvas').classList.remove('hidden');
+    function setup() {
         conn.on('data', data => {
-            enemyX = data.x; enemyY = data.y;
-            draw();
+            if(data.type === 'move') { rival.x = data.x; rival.y = data.y; }
         });
     }
+
+    draw();
 </script>
 </body>
 </html>
