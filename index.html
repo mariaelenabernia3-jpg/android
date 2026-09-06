@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<body>
+    <div id="setup">
+        <input id="peerId" placeholder="ID del amigo (si te unes)">
+        <button onclick="createGame()">Crear Partida</button>
+        <button onclick="joinGame()">Unirse a Partida</button>
+    </div>
+    <p>Tu ID: <span id="myId">...</span></p>
+    <canvas id="canvas" width="300" height="300" style="border:1px solid #000;"></canvas>
+
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <script>
+        const peer = new Peer(); // Crea una conexión única
+        let conn;
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        let x = 150, y = 150;
+
+        peer.on('open', id => document.getElementById('myId').innerText = id);
+
+        function createGame() {
+            peer.on('connection', c => {
+                conn = c;
+                setupConnection();
+            });
+            alert("Espera a que tu amigo ingrese tu ID.");
+        }
+
+        function joinGame() {
+            const id = document.getElementById('peerId').value;
+            conn = peer.connect(id);
+            setupConnection();
+        }
+
+        function setupConnection() {
+            conn.on('data', data => {
+                x = data.x; y = data.y;
+                draw();
+            });
+        }
+
+        // Moverse al tocar la pantalla
+        canvas.addEventListener('touchmove', (e) => {
+            x = e.touches[0].clientX;
+            y = e.touches[0].clientY;
+            if(conn) conn.send({x, y});
+            draw();
+        });
+
+        function draw() {
+            ctx.clearRect(0, 0, 300, 300);
+            ctx.fillStyle = 'red';
+            ctx.fillRect(x, y, 50, 50);
+        }
+    </script>
+</body>
+</html>
