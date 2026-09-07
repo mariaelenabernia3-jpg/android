@@ -3,74 +3,90 @@
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <style>
-        body { margin: 0; background: #050505; color: #00ffcc; font-family: 'Courier New', monospace; text-align: center; overflow: hidden; touch-action: none; }
-        #ui { position: absolute; top: 10px; width: 100%; pointer-events: none; }
-        canvas { display: block; width: 100vw; height: 80vh; background: #111; border-bottom: 5px solid #ff00ff; }
-        #controls { padding: 20px; }
-        button { background: transparent; border: 2px solid #00ffcc; color: #00ffcc; padding: 15px 30px; font-size: 20px; border-radius: 10px; }
+        body { margin: 0; background: #050505; color: #fff; font-family: sans-serif; text-align: center; overflow: hidden; touch-action: none; }
+        canvas { display: block; width: 100vw; height: 70vh; background: #111; }
+        #ui { padding: 10px; }
+        button { background: #ff00ff; color: white; border: none; padding: 15px; margin: 5px; border-radius: 8px; font-weight: bold; }
+        #log { color: #00ffcc; font-size: 14px; }
     </style>
 </head>
 <body>
 
 <div id="ui">
-    <h2 id="status">NEON ARENA</h2>
-    <div id="score">Tú: 0 | Rival: 0</div>
+    <div id="log">Estado: Esperando conexión...</div>
+    <button onclick="copyId()">Copiar ID para WhatsApp</button>
+    <button onclick="connectToRival()">Unirse con ID</button>
 </div>
-
 <canvas id="canvas"></canvas>
-
-<div id="controls">
-    <button onclick="host()">CREAR ARENA</button>
-    <button onclick="join()">UNIRSE</button>
-</div>
 
 <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
 <script>
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
-    const peer = new Peer();
-    let conn, score = [0, 0];
-    let me = {x: 100, y: 100, r: 20}, rival = {x: 200, y: 200, r: 20}, ball = {x: 150, y: 150, r: 10};
+    const log = document.getElementById('log');
+    
+    // Inicializar Peer
+    const peer = new Peer(); 
+    let conn;
+    let me = {x: 100, y: 100}, rival = {x: 200, y: 200};
 
-    // Ajuste de pantalla
     canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight * 0.8;
+    canvas.height = window.innerHeight * 0.7;
 
-    function draw() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        // Dibujar elementos (Neón)
-        ctx.fillStyle = '#00ffcc';
-        ctx.beginPath(); ctx.arc(me.x, me.y, me.r, 0, Math.PI*2); ctx.fill();
-        ctx.fillStyle = '#ff00ff';
-        ctx.beginPath(); ctx.arc(rival.x, rival.y, rival.r, 0, Math.PI*2); ctx.fill();
-        ctx.fillStyle = '#ffff00';
-        ctx.beginPath(); ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI*2); ctx.fill();
-        requestAnimationFrame(draw);
-    }
-
-    canvas.addEventListener('touchmove', (e) => {
-        me.x = e.touches[0].clientX;
-        me.y = e.touches[0].clientY;
-        if(conn) conn.send({type: 'move', x: me.x, y: me.y});
+    // --- CONEXIÓN Y COPIAR ---
+    peer.on('open', id => {
+        log.innerText = "Tu ID (compártelo): " + id;
     });
 
-    function host() {
-        document.getElementById('status').innerText = "ID: " + peer.id;
-        peer.on('connection', c => { conn = c; setup(); });
+    function copyId() {
+        navigator.clipboard.writeText(peer.id).then(() => alert("ID copiado: " + peer.id));
     }
 
-    function join() {
-        let id = prompt("ID del rival:");
+    // El que recibe la conexión
+    peer.on('connection', c => {
+        conn = c;
+        setupConnection();
+    });
+
+    // El que se une
+    function connectToRival() {
+        let id = prompt("Pega aquí el ID que recibiste:");
         conn = peer.connect(id);
-        setup();
+        setupConnection();
     }
 
-    function setup() {
+    function setupConnection() {
+        conn.on('open', () => {
+            log.innerText = "¡CONECTADO CON EL RIVAL!";
+            conn.send({type: 'hi', x: me.x, y: me.y}); // Saludo inicial
+        });
+        
         conn.on('data', data => {
-            if(data.type === 'move') { rival.x = data.x; rival.y = data.y; }
+            if(data.type === 'move') {
+                rival.x = data.x;
+                rival.y = data.y;
+            }
         });
     }
 
+    // --- JUEGO ---
+    canvas.addEventListener('touchmove', (e) => {
+        me.x = e.touches[0].clientX;
+        me.y = e.touches[0].clientY;
+        if(conn && conn.open) {
+            conn.send({type: 'move', x: me.x, y: me.y});
+        }
+        draw();
+    });
+
+    function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = '#00ffcc'; // Tú
+        ctx.fillRect(me.x - 20, me.y - 20, 40, 40);
+        ctx.fillStyle = '#ff00ff'; // Rival
+        ctx.fillRect(rival.x - 20, rival.y - 20, 40, 40);
+        requestAnimationFrame(draw);
+    }
     draw();
 </script>
 </body>
